@@ -56,19 +56,16 @@ The server will be running at http://127.0.0.1:4000 🚀
 ✅ MongoDB database to store credentials
 
 
-📌 Project Routes
+## 📌 Project Routes
 
-Method	Route	Description
+| Method | Route       | Description             |
+|--------|------------|-------------------------|
+| `GET`  | `/`        | Home page               |
+| `GET`  | `/login`   | Login page              |
+| `GET`  | `/register` | Registration page      |
+| `POST` | `/register` | User registration      |
+| `POST` | `/login`   | User authentication     |
 
-GET	/	Home page
-
-GET	/login	Login page
-
-GET	/register	Registration page
-
-POST	/register	User registration
-
-POST	/login	User authentication
 
 Developed with by Clariana Abreu
 
