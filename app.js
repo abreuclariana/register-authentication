@@ -59,7 +59,7 @@ app.post('/register', async (req, res) => {
 
         // Criação de um novo usuário com e-mail e senha criptografada
         const newUser = new User({
-            email: req.body.email, // Captura o e-mail do formulário
+            email: req.body.username, // Captura o e-mail do formulário
             password: hash // Armazena a senha criptografada
         });
 
@@ -71,7 +71,7 @@ app.post('/register', async (req, res) => {
 
 // Rota POST para login do usuário
 app.post('/login', async (req, res) => {
-    const userName = req.body.email; // Captura o e-mail do formulário
+    const userName = req.body.username; // Captura o e-mail do formulário
     const password = req.body.password; // Captura a senha digitada
 
     try {
