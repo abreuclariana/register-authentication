@@ -79,7 +79,7 @@ app.post('/login', async (req, res) => {
         const resultUser = await User.findOne({ email: userName }).exec();
 
         if (!resultUser) {
-            return res.send('<h2>Usuário não encontrado</h2>'); // Mensagem caso o usuário não seja encontrado
+            return res.send('<h2>User not found</h2>'); // Mensagem caso o usuário não seja encontrado
         }
 
         // Compara a senha digitada com o hash do banco de dados
@@ -87,12 +87,12 @@ app.post('/login', async (req, res) => {
             if (result === true) { // Se a senha estiver correta
                 res.render('secrets'); // Renderiza a página secrets.ejs
             } else {
-                res.send('<h2>Senha incorreta</h2>'); // Mensagem de erro caso a senha esteja errada
+                res.send('<h2>Incorrect password</h2>'); // Mensagem de erro caso a senha esteja errada
             }
         });
     } catch (error) {
         console.log('Erro no sistema', error); // Exibe erros no console
-        res.status(500).send("Erro interno no servidor."); // Retorna erro 500 para o cliente
+        res.status(500).send("Internal server error."); // Retorna erro 500 para o cliente
     }
 });
 
