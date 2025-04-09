@@ -41,7 +41,7 @@ Create a .env file in the root directory and add your configurations:
 
 5️⃣ Run the server:
 
-    npm start
+    node app.js
 
 The server will be running at http://127.0.0.1:4000 🚀
 
