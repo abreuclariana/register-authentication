@@ -22,8 +22,8 @@ This is a user authentication project built with **Node.js**, **Express**, **Mon
 ### 1️⃣ Clone the repository:
 
    
-    git clone https://github.com/your-username/your-repository.git
-    cd your-repository
+    git clone https://github.com/abreuclariana/register-authentication
+    cd register-authentication
 
 
 
