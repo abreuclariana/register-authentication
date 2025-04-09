@@ -21,7 +21,7 @@ This is a user authentication project built with **Node.js**, **Express**, **Mon
 
 ### 1️⃣ Clone the repository:
 
-    ```sh
+   
     git clone https://github.com/your-username/your-repository.git
     cd your-repository
 
@@ -29,7 +29,7 @@ This is a user authentication project built with **Node.js**, **Express**, **Mon
 
 2️⃣ Install dependencies:
 
-    ```sh
+    
     npm install
 
 
