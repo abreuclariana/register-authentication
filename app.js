@@ -2,8 +2,7 @@ import dotenv from 'dotenv'; // Importa a biblioteca dotenv para carregar variá
 import express from 'express'; // Importa o framework Express para criar o servidor
 import ejs from 'ejs'; // Importa o mecanismo de visualização EJS para renderizar páginas dinâmicas
 import mongoose from 'mongoose'; // Importa a biblioteca Mongoose para interagir com o MongoDB
-// import encrypt from 'mongoose-encryption'; // Biblioteca de criptografia (desativada neste código)
-// import md5 from 'md5'; // Biblioteca md5 para criptografia de senhas (não usada, pois bcrypt é mais seguro)
+import session from 'express-session'; // Importa express-session para gerenciamento de sessões
 import bcrypt from 'bcrypt'; // Importa a biblioteca bcrypt para hashing seguro de senhas
 
 dotenv.config(); // Carrega as variáveis de ambiente do arquivo .env
@@ -16,12 +15,20 @@ app.use(express.static('public')); // Define a pasta 'public' para arquivos est�
 app.set('view engine', 'ejs'); // Define o mecanismo de visualização como EJS
 app.use(express.urlencoded({ extended: true })); // Permite a interpretação de dados enviados via formulário
 
+// Configuração de sessão
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // Para desenvolvimento local
+}));
+
 // Conexão com o banco de dados MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/userDB', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/userDB', {
     useNewUrlParser: true, // Utiliza o novo formato de URL do MongoDB
     useUnifiedTopology: true // Garante a conexão estável sem uso de drivers antigos
-}).then(() => console.log("MongoDB Conectado!")) // Mensagem de sucesso na conexão
-  .catch(err => console.log("Erro ao conectar ao MongoDB:", err)); // Captura e exibe erros na conexão
+}).then(() => console.log("MongoDB Connected!")) // Mensagem de sucesso na conexão
+  .catch(err => console.log("Error connecting to MongoDB:", err)); // Captura e exibe erros na conexão
 
 // Definição do esquema (schema) do usuário no MongoDB
 const userSchema = new mongoose.Schema({
@@ -29,10 +36,23 @@ const userSchema = new mongoose.Schema({
     password: String // Campo para armazenar a senha criptografada do usuário
 });
 
-// userSchema.plugin(encrypt, { secret: process.env.SECRET, excludeFromEncryption: ['password'] }); // Exemplo de criptografia com mongoose-encryption (desativado)
+// Definição do esquema para segredos
+const secretSchema = new mongoose.Schema({
+    secret: String // Campo para armazenar o segredo
+});
 
-// Criação do modelo (model) User baseado no esquema definido
+// Criação dos modelos baseados nos esquemas definidos
 const User = mongoose.model('User', userSchema);
+const Secret = mongoose.model('Secret', secretSchema);
+
+// Middleware de autenticação
+const requireAuth = (req, res, next) => {
+    if (req.session.userId) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+};
 
 // Rota principal - Renderiza a página inicial
 app.get('/', (req, res) => {
@@ -51,52 +71,115 @@ app.get('/register', (req, res) => {
 
 // Rota POST para registrar um novo usuário
 app.post('/register', async (req, res) => {
-    bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-        if (err) {
-            console.log("Erro ao gerar hash:", err);
-            return res.status(500).send("Erro no servidor"); // Retorna erro 500 em caso de falha no hash
+    const email = req.body.username;
+    const password = req.body.password;
+
+    try {
+        // Verificar se o usuário já existe
+        const existingUser = await User.findOne({ email: email });
+        if (existingUser) {
+            return res.render('register', { error: 'User already exists with this email!' });
         }
 
-        // Criação de um novo usuário com e-mail e senha criptografada
+        // Gerar hash da senha
+        const hash = await bcrypt.hash(password, saltRounds);
+
+        // Criar novo usuário
         const newUser = new User({
-            email: req.body.username, // Captura o e-mail do formulário
-            password: hash // Armazena a senha criptografada
+            email: email,
+            password: hash
         });
 
-        newUser.save()
-        .then(() => res.render('secrets')) // Após salvar, renderiza a página secrets.ejs
-        .catch(err => console.log("Erro ao salvar usuário:", err)); // Captura erros ao salvar
-    });
+        await newUser.save();
+        
+        // Definir sessão do usuário
+        req.session.userId = newUser._id;
+        
+        res.render('secrets', { user: newUser });
+    } catch (err) {
+        console.log("Erro ao registrar usuário:", err);
+        res.render('register', { error: 'Internal server error. Please try again.' });
+    }
 });
 
 // Rota POST para login do usuário
 app.post('/login', async (req, res) => {
-    const userName = req.body.username; // Captura o e-mail do formulário
-    const password = req.body.password; // Captura a senha digitada
+    const email = req.body.username;
+    const password = req.body.password;
 
     try {
         // Procura no banco de dados um usuário com o e-mail fornecido
-        const resultUser = await User.findOne({ email: userName }).exec();
+        const user = await User.findOne({ email: email });
 
-        if (!resultUser) {
-            return res.send('<h2>User not found</h2>'); // Mensagem caso o usuário não seja encontrado
+        if (!user) {
+            return res.render('login', { error: 'User not found!' });
         }
 
         // Compara a senha digitada com o hash do banco de dados
-        bcrypt.compare(password, resultUser.password, function(err, result) {
-            if (result === true) { // Se a senha estiver correta
-                res.render('secrets'); // Renderiza a página secrets.ejs
-            } else {
-                res.send('<h2>Incorrect password</h2>'); // Mensagem de erro caso a senha esteja errada
-            }
-        });
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        
+        if (isValidPassword) {
+            // Definir sessão do usuário
+            req.session.userId = user._id;
+            res.render('secrets', { user: user });
+        } else {
+            res.render('login', { error: 'Incorrect password!' });
+        }
     } catch (error) {
-        console.log('Erro no sistema', error); // Exibe erros no console
-        res.status(500).send("Internal server error."); // Retorna erro 500 para o cliente
+        console.log('Erro no sistema de login:', error);
+        res.render('login', { error: 'Internal server error. Please try again.' });
     }
 });
 
-// Inicializa o servidor na porta 4000 e exibe uma mensagem no console
-app.listen(4000, () => {
-    console.log('Servidor rodando na porta 4000'); // Mensagem indicando que o servidor está rodando
+// Rota para página de segredos (protegida)
+app.get('/secrets', requireAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        res.render('secrets', { user: user });
+    } catch (error) {
+        console.log('Erro ao carregar segredos:', error);
+        res.redirect('/login');
+    }
+});
+
+// Rota para página de envio de segredos (protegida)
+app.get('/submit', requireAuth, (req, res) => {
+    res.render('submit');
+});
+
+// Rota POST para enviar segredos
+app.post('/submit', requireAuth, async (req, res) => {
+    const secret = req.body.secret;
+    
+    if (!secret || secret.trim() === '') {
+        return res.render('submit', { error: 'Please enter a secret!' });
+    }
+
+    try {
+        const newSecret = new Secret({
+            secret: secret.trim()
+        });
+
+        await newSecret.save();
+        res.render('secrets', { success: 'Secret shared successfully!' });
+    } catch (error) {
+        console.log('Erro ao salvar segredo:', error);
+        res.render('submit', { error: 'Error saving secret. Please try again.' });
+    }
+});
+
+// Rota de logout
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.log('Erro ao fazer logout:', err);
+        }
+        res.redirect('/');
+    });
+});
+
+// Inicializa o servidor na porta configurada e exibe uma mensagem no console
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`); // Mensagem indicando que o servidor está rodando
 });

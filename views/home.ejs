@@ -7,7 +7,7 @@
     <h1 class="display-3 font-weight-bold mb-4">Secret</h1>
     <p class="lead mb-4">Don't save your secrets, share them anonymously!</p>
     <hr class="my-4 border-dark">
-    <div class="d-flex justify-content-center gap-3">
+    <div class="d-flex justify-content-center" style="gap: 1rem;">
       <a class="btn btn-primary btn-lg px-4 py-2" href="/register" role="button">Register</a>
       <a class="btn btn-success btn-lg px-4 py-2" href="/login" role="button">Login</a>
     </div>
@@ -19,39 +19,174 @@
 
 <!-- Add Custom Styles -->
 <style>
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
   .jumbotron {
-    background-image: url('https://via.placeholder.com/1920x600/f4f4f4/333333?text=Background');
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, rgba(240,240,240,0.8) 0%, rgba(214, 208, 208, 0.6) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200,200,200,0.3);
+    border-radius: 20px;
+    margin: 2rem;
+    padding: 4rem 2rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .jumbotron::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(230,230,230,0.2) 0%, transparent 50%, rgba(210,210,210,0.1) 100%);
+    pointer-events: none;
   }
 
   .jumbotron .container {
-    z-index: 1;
+    position: relative;
+    z-index: 2;
+  }
+
+  .jumbotron i.fa-key {
+    color: #938f8f;
+    text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .jumbotron h1 {
+    color: #121212;
+    text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .jumbotron .lead {
+    color: rgba(19, 19, 19, 0.9);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-size: 1.4rem;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .jumbotron hr {
+    border-color: rgba(255,255,255,0.3) !important;
+    border-width: 2px;
+    width: 60%;
+    margin: 2rem auto;
   }
 
   .btn-lg {
-    border-radius: 30px;
-    font-weight: bold;
+    border-radius: 50px;
+    font-weight: 600;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-lg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-lg:hover::before {
+    left: 100%;
   }
 
   .btn-primary {
-    background-color: #007bff;
-    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 2px solid rgba(255,255,255,0.2);
     color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    border-color: rgba(255,255,255,0.4);
   }
 
   .btn-success {
-    background-color: #28a745;
-    border: none;
-    color: white;
+    background: linear-gradient(135deg, #56ab2f 0%, );
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgb(227, 223, 223);
   }
 
-  .lead {
-    font-size: 1.5rem;
-    font-weight: 300;
+  .btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(86, 171, 47, 0.4);
+    border-color: rgba(255,255,255,0.4);
   }
 
-  .border-dark {
-    border-color: #333333 !important;
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .jumbotron {
+      margin: 1rem;
+      padding: 3rem 1.5rem;
+    }
+    
+    .jumbotron h1 {
+      font-size: 2.5rem;
+    }
+    
+    .jumbotron .lead {
+      font-size: 1.2rem;
+    }
+    
+    .d-flex {
+      flex-direction: column;
+      gap: 1.5rem !important;
+    }
+    
+    .d-flex .btn {
+      margin-bottom: 1rem !important;
+    }
+    
+    .btn-lg {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+
+  /* Particle effect background */
+  .jumbotron::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+      radial-gradient(circle at 40% 80%, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px, 80px 80px, 60px 60px;
+    animation: sparkle 20s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes sparkle {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-100px); }
   }
 </style>
