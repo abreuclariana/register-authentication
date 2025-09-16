@@ -24,11 +24,9 @@ app.use(session({
 }));
 
 // Conexão com o banco de dados MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/userDB', {
-    useNewUrlParser: true, // Utiliza o novo formato de URL do MongoDB
-    useUnifiedTopology: true // Garante a conexão estável sem uso de drivers antigos
-}).then(() => console.log("MongoDB Connected!")) // Mensagem de sucesso na conexão
-  .catch(err => console.log("Error connecting to MongoDB:", err)); // Captura e exibe erros na conexão
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/userDB')
+.then(() => console.log("MongoDB Connected!"))
+.catch(err => console.log("Error connecting to MongoDB:", err));
 
 // Definição do esquema (schema) do usuário no MongoDB
 const userSchema = new mongoose.Schema({
